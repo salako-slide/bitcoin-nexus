@@ -202,3 +202,35 @@
     (ok true)
   )
 )
+
+;; Authorization Helper
+(define-private (check-is-bridge-owner)
+  (begin
+    (asserts! (is-eq tx-sender (var-get bridge-owner)) ERR-NOT-AUTHORIZED)
+    (ok true)
+  )
+)
+
+;; Read-Only Functions
+(define-read-only (get-total-locked-bitcoin)
+  (var-get total-locked-bitcoin)
+)
+
+(define-read-only (get-user-balance (user principal))
+  (get-user-balance-amount user)
+)
+
+(define-read-only (is-oracle-authorized (oracle principal))
+  (default-to false (map-get? authorized-oracles oracle))
+)
+
+;; Balance Helper
+(define-private (get-user-balance-amount (user principal))
+  (let 
+    ((balance-opt (map-get? user-balances {user: user})))
+    (if (is-some balance-opt)
+        (get amount (unwrap-panic balance-opt))
+        u0
+    )
+  )
+)
